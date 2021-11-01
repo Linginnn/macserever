@@ -1,5 +1,7 @@
 {
   "extends": "../../tsconfig.json",
+  "allowSyntheticDefaultImports": true,
+  "esModuleInterop": true,
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
