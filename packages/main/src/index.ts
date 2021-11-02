@@ -41,7 +41,7 @@ if (import.meta.env.MODE === "development") {
 
 let mainWindow: BrowserWindow | null = null;
 
-const expressApp = new Koa();
+const koaApp = new Koa();
 
 const router = new KoaRouter();
 
@@ -66,12 +66,19 @@ const createWindow = async () => {
     if (import.meta.env.MODE === "development") {
       mainWindow?.webContents.openDevTools();
     }
-    router.get("/api/env", async (ctx: any) => {
+    router.get("/api/env", async (ctx: any, next: any) => {
+      await next();
       // @ts-ignore
       ctx.body = data;
     });
-    expressApp.use(router.routes());
-    expressApp.listen(25090);
+    koaApp.use(async (ctx: any, next: () => any) => {
+      ctx.set("Access-Control-Allow-Origin", "*");
+      ctx.set("Access-Control-Allow-Methods", "PUT,DELETE,POST,GET");
+      ctx.set("Access-Control-Max-Age", 3600 * 24);
+      await next();
+    });
+    koaApp.use(router.routes());
+    koaApp.listen(20509);
   });
 
   /**
@@ -100,7 +107,6 @@ app.on("second-instance", () => {
 });
 
 app.on("window-all-closed", () => {
-  expressApp.close();
   if (process.platform !== "darwin") {
     app.quit();
   }
