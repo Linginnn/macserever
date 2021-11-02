@@ -1,14 +1,18 @@
 <template>
-  <app-navigation />
+  <n-message-provider>
+    <get-mac />
+  </n-message-provider>
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
-import AppNavigation from './components/GetMac.vue';
+import { defineComponent } from 'vue';
+import { NMessageProvider } from 'naive-ui';
+import GetMac from './components/GetMac.vue';
 export default defineComponent({
   name: 'App',
   components: {
-    AppNavigation,
+    GetMac,
+    NMessageProvider,
   },
 });
 </script>

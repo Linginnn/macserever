@@ -68,8 +68,8 @@
         }
       ],
       "window": {
-        "width": 500,
-        "height": 500
+        "width": 900,
+        "height": 800
       }
     },
     "win": {
@@ -98,6 +98,7 @@
     }
   },
   "dependencies": {
+    "electron-store": "^8.0.1",
     "electron-updater": "4.6.1",
     "koa": "^2.13.4",
     "koa-router": "^10.1.1",

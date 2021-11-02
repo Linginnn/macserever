@@ -1,5 +1,75 @@
 <template>
   <div class="container">
+    <div class="con">
+      <n-button
+        type="info"
+        @click="showModal = true"
+      >
+        配置MAC地址
+      </n-button>
+      <n-modal
+        v-model:show="showModal"
+        style="width: 80%"
+      >
+        <n-card title="配置mac地址">
+          <template #header-extra>
+            <n-button
+              type="info"
+              @click="showModal2 = true"
+            >
+              新增
+            </n-button>
+          </template>
+          <n-data-table
+            :columns="columns"
+            :data="data"
+            :pagination="pagination"
+          />
+        </n-card>
+      </n-modal>
+      <n-modal
+        v-model:show="showModal2"
+        style="width: 80%"
+      >
+        <n-card title="配置mac地址">
+          <n-form
+            ref="formRef2"
+            :model="formValue2"
+            label-placement="top"
+            show-label
+            :rules="rules2"
+          >
+            <n-form-item
+              label="mac地址"
+              path="value"
+            >
+              <n-input
+                v-model:value="formValue2.value"
+                placeholder="输入Mac地址"
+              />
+            </n-form-item>
+            <n-form-item
+              label="名称"
+              path="label"
+            >
+              <n-input
+                v-model:value="formValue2.label"
+                placeholder="输入名称"
+              />
+            </n-form-item>
+          </n-form>
+          <template #action>
+            <n-button
+              type="info"
+              @click="handleGetData"
+            >
+              确定
+            </n-button>
+          </template>
+        </n-card>
+      </n-modal>
+    </div>
+
     <n-form
       ref="formRef"
       :model="formValue"
@@ -13,7 +83,7 @@
       >
         <n-select
           v-model:value="formValue.mac"
-          :options="generalOptions"
+          :options="data"
           clearable
         />
       </n-form-item>
@@ -40,8 +110,51 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRaw } from 'vue';
-import { NForm, NFormItem, NInput, NButton, NSelect } from 'naive-ui';
+import { defineComponent, reactive, ref, toRaw, h } from 'vue';
+import {
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
+  NSelect,
+  NDataTable,
+  NModal,
+  NCard,
+  useMessage,
+} from 'naive-ui';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//  @ts-ignore
+const createColumns = ({ deletelM }) => {
+  return [
+    {
+      title: 'mac地址',
+      key: 'value',
+      align: 'center',
+    },
+    {
+      title: '名称',
+      key: 'label',
+      align: 'center',
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //  @ts-ignore
+      render(row) {
+        return h(
+          NButton,
+          {
+            size: 'small',
+            type: 'error',
+            onClick: () => deletelM(row),
+          },
+          { default: () => '删除' },
+        );
+      },
+    },
+  ];
+};
 export default defineComponent({
   name: 'AppNavigation',
   components: {
@@ -50,40 +163,114 @@ export default defineComponent({
     NButton,
     NSelect,
     NFormItem,
+    NDataTable,
+    NModal,
+    NCard,
   },
   setup() {
+    localStorage.setItem(
+      'macs',
+      JSON.stringify([
+        {
+          value: 'C03C590CE244',
+          label: '西药房-C03C590CE244',
+        },
+        {
+          value: '5405DB70B6CC',
+          label: '中药房-5405DB70B6CC',
+        },
+      ]),
+    );
     const formRef = ref(null);
+    const formRef2 = ref(null);
+    const showModal2 = ref(false);
+    const message = useMessage();
     const formValue = reactive({
       cmac: '',
       mac: 'C03C590CE244',
+    });
+    const formValue2 = reactive({
+      label: '',
+      value: '',
     });
     const handleValidateClick = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //  @ts-ignore
       globalThis.electron.ipcRenderer.send('mac', toRaw(formValue));
     };
+    const handleGetData = () => {
+      formRef2.value &&
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //  @ts-ignore
+        formRef2.value.validate((errors: any) => {
+          if (!errors) {
+            const oldData = localStorage.getItem('macs');
+            const newData = oldData
+              ? [...JSON.parse(oldData), toRaw(formValue2)]
+              : [toRaw(formValue2)];
+            localStorage.setItem('macs', JSON.stringify(newData));
+            showModal2.value = false;
+            data.value = newData;
+            message.success('修改成功');
+          }
+        });
+    };
+    const macs = localStorage.getItem('macs')
+    const data = ref(
+      macs
+        ? JSON.parse(macs)
+        : [
+            {
+              value: 'C03C590CE244',
+              label: '西药房-C03C590CE244',
+            },
+            {
+              value: '5405DB70B6CC',
+              label: '中药房-5405DB70B6CC',
+            },
+          ],
+    );
     return {
       // - C03C590CE244 西药房mac地址
       // - 5405DB70B6CC 中药房mac地址
       formRef,
+      formRef2,
       formValue,
-      generalOptions: ref([
-        {
-          label: '中药房-5405DB70B6CC',
-          value: '5405DB70B6CC',
+      formValue2,
+      data,
+      columns: createColumns({
+        deletelM(rowData: { value: any; }) {
+          const newData = data.value.filter(
+            (item: { value: any; }) => item.value !== rowData.value,
+          );
+          localStorage.setItem('macs', JSON.stringify(newData));
+          data.value = newData;
+          // message.info('send mail to ' + rowData.name);
         },
-        {
-          label: '西药房-C03C590CE244',
-          value: 'C03C590CE244',
-        },
-      ]),
+      }),
+      pagination: {
+        pageSize: 10,
+      },
+      showModal: ref(false),
+      showModal2,
       rules: {
         mac: {
           required: true,
           message: '请选择',
         },
       },
+      rules2: {
+        mac: {
+          required: true,
+          message: '请选择',
+        },
+        name: {
+          required: true,
+          message: '请选择',
+        },
+      },
       handleValidateClick,
+      handleGetData,
     };
   },
 });
@@ -96,5 +283,10 @@ export default defineComponent({
   height: 100vh;
   justify-content: center;
   background-color: aliceblue;
+}
+.con {
+  position: fixed;
+  right: 30px;
+  top: 50px;
 }
 </style>
