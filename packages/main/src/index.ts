@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore
 import Koa from "koa";
 // @ts-ignore
@@ -13,15 +14,16 @@ if (!isSingleInstance) {
   process.exit(0);
 }
 
-let data = {
-  ipAddr: "虚拟ip",
+const data = {
+  ipAddr: "西药房-C03C590CE244",
   macAddr: "C03C590CE244",
 };
 
 app.disableHardwareAcceleration();
 
 ipcMain.on("mac", (event, args) => {
-  data.macAddr = args.cmac || args.mac;
+  data.macAddr = args.value;
+  data.ipAddr = args.label;
 });
 
 // Install "Vue.js devtools"
@@ -68,6 +70,7 @@ const createWindow = async () => {
     }
     router.get("/api/env", async (ctx: any, next: any) => {
       await next();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       ctx.body = data;
     });

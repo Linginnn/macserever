@@ -1,24 +1,11 @@
 <template>
   <div class="container">
     <div class="con">
-      <n-button
-        type="info"
-        @click="showModal = true"
-      >
-        配置MAC地址
-      </n-button>
-      <n-modal
-        v-model:show="showModal"
-        style="width: 80%"
-      >
+      <n-button type="info" @click="showModal = true"> 配置MAC地址 </n-button>
+      <n-modal v-model:show="showModal" style="width: 80%">
         <n-card title="配置mac地址">
           <template #header-extra>
-            <n-button
-              type="info"
-              @click="showModal2 = true"
-            >
-              新增
-            </n-button>
+            <n-button type="info" @click="showModal2 = true"> 新增 </n-button>
           </template>
           <n-data-table
             :columns="columns"
@@ -27,10 +14,7 @@
           />
         </n-card>
       </n-modal>
-      <n-modal
-        v-model:show="showModal2"
-        style="width: 80%"
-      >
+      <n-modal v-model:show="showModal2" style="width: 80%">
         <n-card title="配置mac地址">
           <n-form
             ref="formRef2"
@@ -39,19 +23,13 @@
             show-label
             :rules="rules2"
           >
-            <n-form-item
-              label="mac地址"
-              path="value"
-            >
+            <n-form-item label="mac地址" path="value">
               <n-input
                 v-model:value="formValue2.value"
                 placeholder="输入Mac地址"
               />
             </n-form-item>
-            <n-form-item
-              label="名称"
-              path="label"
-            >
+            <n-form-item label="名称" path="label">
               <n-input
                 v-model:value="formValue2.label"
                 placeholder="输入名称"
@@ -59,12 +37,7 @@
             </n-form-item>
           </n-form>
           <template #action>
-            <n-button
-              type="info"
-              @click="handleGetData"
-            >
-              确定
-            </n-button>
+            <n-button type="info" @click="handleGetData"> 确定 </n-button>
           </template>
         </n-card>
       </n-modal>
@@ -77,24 +50,11 @@
       show-label
       :rules="rules"
     >
-      <n-form-item
-        label="药方类型"
-        path="mac"
-      >
-        <n-select
-          v-model:value="formValue.mac"
-          :options="data"
-          clearable
-        />
+      <n-form-item label="药方类型" path="mac">
+        <n-select v-model:value="formValue.mac" :options="data" clearable />
       </n-form-item>
-      <n-form-item
-        label="自定义mac地址"
-        path="cmac"
-      >
-        <n-input
-          v-model:value="formValue.cmac"
-          placeholder="输入Mac地址"
-        />
+      <n-form-item label="自定义mac地址" path="cmac">
+        <n-input v-model:value="formValue.cmac" placeholder="输入Mac地址" />
       </n-form-item>
       <n-form-item>
         <n-button
@@ -110,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRaw, h } from 'vue';
+import { defineComponent, reactive, ref, toRaw, h } from "vue";
 import {
   NForm,
   NFormItem,
@@ -121,42 +81,42 @@ import {
   NModal,
   NCard,
   useMessage,
-} from 'naive-ui';
+} from "naive-ui";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //  @ts-ignore
 const createColumns = ({ deletelM }) => {
   return [
     {
-      title: 'mac地址',
-      key: 'value',
-      align: 'center',
+      title: "mac地址",
+      key: "value",
+      align: "center",
     },
     {
-      title: '名称',
-      key: 'label',
-      align: 'center',
+      title: "名称",
+      key: "label",
+      align: "center",
     },
     {
-      title: '操作',
-      key: 'actions',
+      title: "操作",
+      key: "actions",
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //  @ts-ignore
       render(row) {
         return h(
           NButton,
           {
-            size: 'small',
-            type: 'error',
+            size: "small",
+            type: "error",
             onClick: () => deletelM(row),
           },
-          { default: () => '删除' },
+          { default: () => "删除" }
         );
       },
     },
   ];
 };
 export default defineComponent({
-  name: 'AppNavigation',
+  name: "AppNavigation",
   components: {
     NForm,
     NInput,
@@ -169,67 +129,69 @@ export default defineComponent({
   },
   setup() {
     localStorage.setItem(
-      'macs',
+      "macs",
       JSON.stringify([
         {
-          value: 'C03C590CE244',
-          label: '西药房-C03C590CE244',
+          value: "C03C590CE244",
+          label: "西药房-C03C590CE244",
         },
         {
-          value: '5405DB70B6CC',
-          label: '中药房-5405DB70B6CC',
+          value: "5405DB70B6CC",
+          label: "中药房-5405DB70B6CC",
         },
-      ]),
+      ])
     );
     const formRef = ref(null);
     const formRef2 = ref(null);
     const showModal2 = ref(false);
     const message = useMessage();
     const formValue = reactive({
-      cmac: '',
-      mac: 'C03C590CE244',
+      cmac: "",
+      mac: "C03C590CE244",
     });
     const formValue2 = reactive({
-      label: '',
-      value: '',
+      label: "",
+      value: "",
     });
-    const handleValidateClick = () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //  @ts-ignore
-      globalThis.electron.ipcRenderer.send('mac', toRaw(formValue));
-    };
-    const handleGetData = () => {
-      formRef2.value &&
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //  @ts-ignore
-        formRef2.value.validate((errors: any) => {
-          if (!errors) {
-            const oldData = localStorage.getItem('macs');
-            const newData = oldData
-              ? [...JSON.parse(oldData), toRaw(formValue2)]
-              : [toRaw(formValue2)];
-            localStorage.setItem('macs', JSON.stringify(newData));
-            showModal2.value = false;
-            data.value = newData;
-            message.success('修改成功');
-          }
-        });
-    };
-    const macs = localStorage.getItem('macs')
+    const macs = localStorage.getItem("macs");
     const data = ref(
       macs
         ? JSON.parse(macs)
         : [
             {
-              value: 'C03C590CE244',
-              label: '西药房-C03C590CE244',
+              value: "C03C590CE244",
+              label: "西药房-C03C590CE244",
             },
             {
-              value: '5405DB70B6CC',
-              label: '中药房-5405DB70B6CC',
+              value: "5405DB70B6CC",
+              label: "中药房-5405DB70B6CC",
             },
-          ],
+          ]
     );
+    const handleValidateClick = () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      const target =toRaw(data.value).find((item:any) => item.value === formValue.mac);
+      //  @ts-ignore
+      globalThis.electron.ipcRenderer.send("mac", target);
+    };
+    const handleGetData = () => {
+      formRef2.value &&
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //  @ts-ignore
+        formRef2.value.validate((errors: any) => {
+          if (!errors) {
+            const oldData = localStorage.getItem("macs");
+            const newData = oldData
+              ? [...JSON.parse(oldData), toRaw(formValue2)]
+              : [toRaw(formValue2)];
+            localStorage.setItem("macs", JSON.stringify(newData));
+            showModal2.value = false;
+            data.value = newData;
+            message.success("修改成功");
+          }
+        });
+    };
+
     return {
       // - C03C590CE244 西药房mac地址
       // - 5405DB70B6CC 中药房mac地址
@@ -239,11 +201,11 @@ export default defineComponent({
       formValue2,
       data,
       columns: createColumns({
-        deletelM(rowData: { value: any; }) {
+        deletelM(rowData: { value: any }) {
           const newData = data.value.filter(
-            (item: { value: any; }) => item.value !== rowData.value,
+            (item: { value: any }) => item.value !== rowData.value
           );
-          localStorage.setItem('macs', JSON.stringify(newData));
+          localStorage.setItem("macs", JSON.stringify(newData));
           data.value = newData;
           // message.info('send mail to ' + rowData.name);
         },
@@ -256,17 +218,17 @@ export default defineComponent({
       rules: {
         mac: {
           required: true,
-          message: '请选择',
+          message: "请选择",
         },
       },
       rules2: {
         mac: {
           required: true,
-          message: '请选择',
+          message: "请选择",
         },
         name: {
           required: true,
-          message: '请选择',
+          message: "请选择",
         },
       },
       handleValidateClick,
